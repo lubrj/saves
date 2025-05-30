@@ -3,8 +3,23 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     exit
 }
 
-Add-Type -AssemblyName PresentationFramework
-[System.Windows.MessageBox]::Show("now you are a real hacker")
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public class WinAPI {
+    [DllImport("user32.dll")]
+    public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+}
+"@
+
 for ($i = 1; $i -le 3; $i++) {
-    Start-Process cmd -ArgumentList "/k", "for /l %x in (0,0,1) do dir /s"
+    $process = Start-Process cmd -ArgumentList "/k color 4 & for /l %x in (0,0,1) do dir /s" -PassThru
+
+    Start-Sleep -Milliseconds 500
+
+    $hwnd = $process.MainWindowHandle
+
+    $rand = Get-Random -Minimum 0 -Maximum 1000
+    $randY = Get-Random -Minimum 0 -Maximum 600
+    [WinAPI]::MoveWindow($hwnd, $rand, $randY, 800, 600, $true)
 }
