@@ -3,6 +3,17 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     exit
 }
 
+
+
+
+
+
+
+
+
+
+
+
 Add-Type -AssemblyName PresentationFramework
 [System.Windows.MessageBox]::Show("now you are a real hacker")
 for ($i = 1; $i -le 15; $i++) {
