@@ -74,5 +74,5 @@ while ($true) {
 
     if (-not $sent) { Write-Host "All webhooks failed for this frame." }
 
-    Start-Sleep -Seconds 1
+    Start-Sleep -Seconds 0.33
 }
