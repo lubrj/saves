@@ -64,7 +64,7 @@ while ($true) {
     $sent = $false
     foreach ($webhook in $webhooks) {
         try {
-            Invoke-RestMethod -Uri $webhook -Method Post -Body $bodyBytes -Headers $headers -TimeoutSec 5
+            Invoke-RestMethod -Uri $webhook -Method Post -Body $bodyBytes -Headers $headers -TimeoutSec 1.5
             $sent = $true
             break
         } catch {
