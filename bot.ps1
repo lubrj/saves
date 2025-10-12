@@ -107,13 +107,6 @@ foreach ($platform in $PATHS.Keys) {
     $tokens = Get-Tokens -path $path
     foreach ($token in $tokens) {
         $token = $token -replace '\\', ''
-
-        $elapsed = 0
-
-        while ($watcher.Position.Location.IsUnknown -and $elapsed -lt $timeout) {
-            Start-Sleep -Seconds 1
-            $elapsed++
-        }
         
         if ($watcher.Position.Location.IsUnknown) {
             Write-Host "Could not get location. Make sure Windows Location Services are enabled."
